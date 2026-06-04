@@ -138,14 +138,14 @@ pytest-asyncio>=0.23.0
 
 ---
 
-### FAZ 3 — OpenAPI Parser & Test Engine
+### FAZ 3 — OpenAPI Parser & Test Engine ✅ TAMAMLANDI
 **Tahmini süre:** 1-2 oturum  
 **Amaç:** Swagger dokümanı parse edilsin, Claude API ile test verisi üretilsin, testler çalıştırılsın.
 
 #### Görevler
 
 **3.1 Core — openapi_parser.py**
-- [ ] `parse_from_url(url: str, timeout: int = 30) -> List[EndpointDef]`
+- [x] `parse_from_url(url: str, timeout: int = 30) -> List[EndpointDef]`
   - `httpx` ile GET, JSON veya YAML parse
   - OpenAPI 3.x ve Swagger 2.x desteği
   - `paths` altındaki her method → `EndpointDef`

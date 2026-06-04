@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
 from ui.components.navigation import Sidebar
 from ui.pages.customer_page import CustomerPage
 from ui.pages.dashboard_page import DashboardPage
+from ui.pages.test_runner_page import TestRunnerPage
 from ui.stylesheets import get_global_stylesheet
 from ui.theme import TEXT_SECONDARY, Spacing, Typography
 
@@ -47,12 +48,11 @@ class MainWindow(QMainWindow):
         self._stack = QStackedWidget()
         self._dashboard = DashboardPage(self.db_path)
         self._customer_page = CustomerPage(self.db_path)
+        self._test_runner_page = TestRunnerPage(self.db_path)
 
         self._stack.addWidget(self._dashboard)         # 0
         self._stack.addWidget(self._customer_page)     # 1
-        self._stack.addWidget(                         # 2
-            _placeholder_page("Test Runner — Faz 3'te gelecek")
-        )
+        self._stack.addWidget(self._test_runner_page)  # 2
         self._stack.addWidget(                         # 3
             _placeholder_page("Geçmiş — Faz 4'te gelecek")
         )
@@ -68,6 +68,7 @@ class MainWindow(QMainWindow):
         self._sidebar.history_requested.connect(lambda: self._stack.setCurrentIndex(3))
         self._sidebar.customer_selected.connect(self._on_customer_selected)
         self._sidebar.env_selected.connect(self._on_env_selected)
+        self._sidebar.api_collection_selected.connect(self._on_api_collection_selected)
         self._sidebar.data_changed.connect(self._on_data_changed)
 
         self._dashboard.customer_selected.connect(self._on_customer_selected)
@@ -84,6 +85,19 @@ class MainWindow(QMainWindow):
     def _on_env_selected(self, customer_id: int, env_type: str) -> None:
         self._customer_page.load_customer(customer_id, active_env=env_type)
         self._stack.setCurrentIndex(1)
+
+    def _on_api_collection_selected(self, api_collection_id: int, environment_id: int) -> None:
+        """API koleksiyonu seçildiğinde test runner sayfasını aç."""
+        from core.session_store import ApiCollectionStore, EnvironmentStore
+        api_store = ApiCollectionStore(self.db_path)
+        env_store = EnvironmentStore(self.db_path)
+
+        api = api_store.get_by_id(api_collection_id)
+        env = env_store.get_by_id(environment_id)
+
+        if api and env:
+            self._test_runner_page.load_api_collection(api, env)
+            self._stack.setCurrentIndex(2)
 
     def _on_data_changed(self) -> None:
         self._sidebar.refresh()

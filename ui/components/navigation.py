@@ -52,7 +52,7 @@ class Sidebar(QWidget):
     history_requested = Signal()
     customer_selected = Signal(int)
     env_selected = Signal(int, str)
-    collection_selected = Signal(int)
+    api_collection_selected = Signal(int, int)  # (api_collection_id, environment_id)
     data_changed = Signal()
 
     def __init__(self, db_path: str, parent=None):
@@ -211,6 +211,7 @@ class Sidebar(QWidget):
                     col_item = QTreeWidgetItem(e_item, [f"  {col.name}"])
                     col_item.setData(0, _ROLE_TYPE, _NODE_COLLECTION)
                     col_item.setData(0, _ROLE_ID, col.id)
+                    col_item.setData(0, _ROLE_ENV_TYPE, env.id)  # Environment ID'yi sakla
                     col_item.setForeground(0, QColor(TEXT_SECONDARY))
 
             c_item.setExpanded(True)
@@ -226,7 +227,9 @@ class Sidebar(QWidget):
             customer_id = item.parent().data(0, _ROLE_ID)
             self.env_selected.emit(customer_id, env_type)
         elif node_type == _NODE_COLLECTION:
-            self.collection_selected.emit(node_id)
+            # API koleksiyonu seçildi — collection_id ve environment_id gönder
+            environment_id = item.data(0, _ROLE_ENV_TYPE)
+            self.api_collection_selected.emit(node_id, environment_id)
 
     def _on_add_customer(self) -> None:
         dialog = CustomerDialog(parent=self)
